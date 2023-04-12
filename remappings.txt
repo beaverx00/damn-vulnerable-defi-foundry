@@ -5,4 +5,5 @@ forge-std/=lib/forge-std/src/
 solmate/=lib/solmate/
 @uniswap/v3-core/=lib/v3-core/
 @uniswap/v3-periphery/=lib/v3-periphery/contracts/
+@uniswap/v2-periphery/=lib/v2-periphery/
 solady/=lib/solady/
