@@ -20,7 +20,11 @@ contract DamnValuableTokenSnapshot is ERC20Snapshot {
         _lastSnapshotId = lastSnapshotId;
     }
 
-    function getBalanceAtLastSnapshot(address account) external view returns (uint256) {
+    function getBalanceAtLastSnapshot(address account)
+        external
+        view
+        returns (uint256)
+    {
         return balanceOfAt(account, _lastSnapshotId);
     }
 

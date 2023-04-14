@@ -27,7 +27,10 @@ contract AccountingToken is ERC20Snapshot, OwnableRoles {
         _mint(to, amount);
     }
 
-    function burn(address from, uint256 amount) external onlyRoles(BURNER_ROLE) {
+    function burn(address from, uint256 amount)
+        external
+        onlyRoles(BURNER_ROLE)
+    {
         _burn(from, amount);
     }
 
@@ -35,11 +38,19 @@ contract AccountingToken is ERC20Snapshot, OwnableRoles {
         return _snapshot();
     }
 
-    function _transfer(address, address, uint256) internal pure override {
+    function _transfer(
+        address,
+        address,
+        uint256
+    ) internal pure override {
         revert NotImplemented();
     }
 
-    function _approve(address, address, uint256) internal pure override {
+    function _approve(
+        address,
+        address,
+        uint256
+    ) internal pure override {
         revert NotImplemented();
     }
 }

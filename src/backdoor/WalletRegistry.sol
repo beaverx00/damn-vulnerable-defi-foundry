@@ -49,7 +49,7 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
         walletFactory = walletFactoryAddress;
         token = IERC20(tokenAddress);
 
-        for (uint256 i = 0; i < initialBeneficiaries.length;) {
+        for (uint256 i = 0; i < initialBeneficiaries.length; ) {
             unchecked {
                 beneficiaries[initialBeneficiaries[i]] = true;
                 ++i;
@@ -65,11 +65,14 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
      * @notice Function executed when user creates a Gnosis Safe wallet via GnosisSafeProxyFactory::createProxyWithCallback
      *          setting the registry's address as the callback.
      */
-    function proxyCreated(GnosisSafeProxy proxy, address singleton, bytes calldata initializer, uint256)
-        external
-        override
-    {
-        if (token.balanceOf(address(this)) < PAYMENT_AMOUNT) { // fail early
+    function proxyCreated(
+        GnosisSafeProxy proxy,
+        address singleton,
+        bytes calldata initializer,
+        uint256
+    ) external override {
+        if (token.balanceOf(address(this)) < PAYMENT_AMOUNT) {
+            // fail early
             revert NotEnoughFunds();
         }
 
@@ -120,16 +123,25 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
         wallets[walletOwner] = walletAddress;
 
         // Pay tokens to the newly created wallet
-        SafeTransferLib.safeTransfer(address(token), walletAddress, PAYMENT_AMOUNT);
+        SafeTransferLib.safeTransfer(
+            address(token),
+            walletAddress,
+            PAYMENT_AMOUNT
+        );
     }
 
-    function _getFallbackManager(address payable wallet) private view returns (address) {
-        return abi.decode(
-            GnosisSafe(wallet).getStorageAt(
-                uint256(keccak256("fallback_manager.handler.address")),
-                0x20
-            ),
-            (address)
-        );
+    function _getFallbackManager(address payable wallet)
+        private
+        view
+        returns (address)
+    {
+        return
+            abi.decode(
+                GnosisSafe(wallet).getStorageAt(
+                    uint256(keccak256("fallback_manager.handler.address")),
+                    0x20
+                ),
+                (address)
+            );
     }
 }
