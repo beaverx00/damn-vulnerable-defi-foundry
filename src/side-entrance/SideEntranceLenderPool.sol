@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "solady/src/utils/SafeTransferLib.sol";
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
 
 interface IFlashLoanEtherReceiver {
     function execute() external payable;
@@ -40,7 +40,6 @@ contract SideEntranceLenderPool {
         uint256 balanceBefore = address(this).balance;
 
         IFlashLoanEtherReceiver(msg.sender).execute{value: amount}();
-
         if (address(this).balance < balanceBefore) revert RepayFailed();
     }
 }
