@@ -12,7 +12,7 @@ contract UnstoppableTest is Test {
 
     address deployer;
     address player;
-    address other;
+    address user;
 
     DamnValuableToken token;
     UnstoppableVault vault;
@@ -24,7 +24,7 @@ contract UnstoppableTest is Test {
          */
         deployer = makeAddr("DEPLOYER");
         player = makeAddr("PLAYER");
-        other = makeAddr("OTHER");
+        user = makeAddr("USER");
 
         vm.startPrank(deployer);
         token = new DamnValuableToken();
@@ -39,7 +39,7 @@ contract UnstoppableTest is Test {
         token.transfer(player, INITIAL_PLAYER_TOKEN_BALANCE);
         vm.stopPrank();
 
-        vm.prank(other);
+        vm.prank(user);
         receiverContract = new ReceiverUnstoppable(address(vault));
     }
 
@@ -58,8 +58,8 @@ contract UnstoppableTest is Test {
 
         assertEq(token.balanceOf(player), INITIAL_PLAYER_TOKEN_BALANCE);
 
-        // Show it's possible for other to take out a flash loan
-        vm.prank(other);
+        // Show it's possible for some user to take out a flash loan
+        vm.prank(user);
         receiverContract.executeFlashLoan(100 * 10**18);
     }
 
@@ -75,7 +75,7 @@ contract UnstoppableTest is Test {
          */
 
         // It is no longer possible to execute flash loans
-        vm.prank(other);
+        vm.prank(user);
         vm.expectRevert();
         receiverContract.executeFlashLoan(100 * 10**18);
     }
