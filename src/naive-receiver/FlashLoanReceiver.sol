@@ -2,9 +2,8 @@
 
 pragma solidity ^0.8.0;
 
-import "solady/src/utils/SafeTransferLib.sol";
-import "@openzeppelin/contracts/interfaces/IERC3156FlashBorrower.sol";
-import "./NaiveReceiverLenderPool.sol";
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
+import {IERC3156FlashBorrower} from "@openzeppelin/contracts/interfaces/IERC3156FlashBorrower.sol";
 
 /**
  * @title FlashLoanReceiver
