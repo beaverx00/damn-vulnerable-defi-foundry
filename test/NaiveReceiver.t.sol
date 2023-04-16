@@ -6,13 +6,13 @@ import {NaiveReceiverLenderPool} from "src/naive-receiver/NaiveReceiverLenderPoo
 import {FlashLoanReceiver} from "src/naive-receiver/FlashLoanReceiver.sol";
 
 contract NaiveReceiverTest is Test {
-    uint256 constant ETHER_IN_POOL = 1000 ether;
+    uint256 constant ETHER_IN_POOL = 1_000 ether;
     uint256 constant ETHER_IN_RECEIVER = 10 ether;
-    address public constant ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address constant ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    address deployer;
-    address player;
-    address user;
+    address deployer = makeAddr("DEPLOYER");
+    address player = makeAddr("PLAYER");
+    address user = makeAddr("USER");
 
     NaiveReceiverLenderPool pool;
     FlashLoanReceiver receiver;
@@ -21,21 +21,13 @@ contract NaiveReceiverTest is Test {
         /**
          * SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE
          */
-        deployer = makeAddr("DEPLOYER");
-        player = makeAddr("PLAYER");
-        user = makeAddr("USER");
-
         vm.startPrank(deployer);
 
         pool = new NaiveReceiverLenderPool();
-        vm.label(address(pool), "POOL");
-        vm.deal(deployer, ETHER_IN_POOL);
-        payable(pool).transfer(ETHER_IN_POOL);
+        vm.deal(address(pool), ETHER_IN_POOL);
 
         receiver = new FlashLoanReceiver(address(pool));
-        vm.label(address(receiver), "RECEIVER");
-        vm.deal(deployer, ETHER_IN_RECEIVER);
-        payable(receiver).transfer(ETHER_IN_RECEIVER);
+        vm.deal(address(receiver), ETHER_IN_RECEIVER);
 
         vm.stopPrank();
     }

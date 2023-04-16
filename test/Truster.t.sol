@@ -9,8 +9,8 @@ import {TrusterAttack} from "src/player-contracts/TrusterAttack.sol";
 contract TrusterTest is Test {
     uint256 constant TOKENS_IN_POOL = 1_000_000 ether;
 
-    address deployer;
-    address player;
+    address deployer = makeAddr("DEPLOYER");
+    address player = makeAddr("PLAYER");
 
     DamnValuableToken token;
     TrusterLenderPool pool;
@@ -19,16 +19,10 @@ contract TrusterTest is Test {
         /**
          * SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE
          */
-        deployer = makeAddr("DEPLOYER");
-        player = makeAddr("PLAYER");
-
         vm.startPrank(deployer);
 
         token = new DamnValuableToken();
-        vm.label(address(token), "TOKEN");
-
         pool = new TrusterLenderPool(token);
-        vm.label(address(pool), "POOL");
 
         token.transfer(address(pool), TOKENS_IN_POOL);
 

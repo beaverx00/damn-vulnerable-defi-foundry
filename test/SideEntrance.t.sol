@@ -9,8 +9,8 @@ contract SideEntranceTest is Test {
     uint256 constant ETHER_IN_POOL = 1_000 ether;
     uint256 constant PLAYER_INITIAL_ETH_BALANCE = 1 ether;
 
-    address deployer;
-    address player;
+    address deployer = makeAddr("DEPLOYER");
+    address player = makeAddr("PLAYER");
 
     SideEntranceLenderPool pool;
 
@@ -18,20 +18,16 @@ contract SideEntranceTest is Test {
         /**
          * SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE
          */
-        deployer = makeAddr("DEPLOYER");
-        player = makeAddr("PLAYER");
+        vm.deal(deployer, ETHER_IN_POOL);
+        vm.deal(player, PLAYER_INITIAL_ETH_BALANCE);
 
         vm.startPrank(deployer);
 
         pool = new SideEntranceLenderPool();
-        vm.label(address(pool), "POOL");
 
-        vm.deal(deployer, ETHER_IN_POOL);
         pool.deposit{value: ETHER_IN_POOL}();
 
         vm.stopPrank();
-
-        vm.deal(player, PLAYER_INITIAL_ETH_BALANCE);
     }
 
     function test_SetUpState() public {

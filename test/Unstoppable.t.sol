@@ -7,12 +7,12 @@ import {ReceiverUnstoppable} from "src/unstoppable/ReceiverUnstoppable.sol";
 import {UnstoppableVault} from "src/unstoppable/UnstoppableVault.sol";
 
 contract UnstoppableTest is Test {
-    uint256 constant TOKENS_IN_VAULT = 1_000_000 * 10**18;
-    uint256 constant INITIAL_PLAYER_TOKEN_BALANCE = 10 * 10**18;
+    uint256 constant TOKENS_IN_VAULT = 1_000_000 ether;
+    uint256 constant INITIAL_PLAYER_TOKEN_BALANCE = 10 ether;
 
-    address deployer;
-    address player;
-    address user;
+    address deployer = makeAddr("DEPLOYER");
+    address player = makeAddr("PLAYER");
+    address user = makeAddr("USER");
 
     DamnValuableToken token;
     UnstoppableVault vault;
@@ -22,21 +22,16 @@ contract UnstoppableTest is Test {
         /**
          * SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE
          */
-        deployer = makeAddr("DEPLOYER");
-        player = makeAddr("PLAYER");
-        user = makeAddr("USER");
-
         vm.startPrank(deployer);
-        token = new DamnValuableToken();
-        vm.label(address(token), "TOKEN");
 
+        token = new DamnValuableToken();
         vault = new UnstoppableVault(token, deployer, deployer);
-        vm.label(address(vault), "VAULT");
 
         token.approve(address(vault), TOKENS_IN_VAULT);
         vault.deposit(TOKENS_IN_VAULT, deployer);
 
         token.transfer(player, INITIAL_PLAYER_TOKEN_BALANCE);
+
         vm.stopPrank();
 
         vm.prank(user);
@@ -51,16 +46,13 @@ contract UnstoppableTest is Test {
         assertEq(vault.totalSupply(), TOKENS_IN_VAULT);
         assertEq(vault.maxFlashLoan(address(token)), TOKENS_IN_VAULT);
         assertEq(vault.flashFee(address(token), TOKENS_IN_VAULT - 1), 0);
-        assertEq(
-            vault.flashFee(address(token), TOKENS_IN_VAULT),
-            50000 * 10**18
-        );
+        assertEq(vault.flashFee(address(token), TOKENS_IN_VAULT), 50000 ether);
 
         assertEq(token.balanceOf(player), INITIAL_PLAYER_TOKEN_BALANCE);
 
         // Show it's possible for some user to take out a flash loan
         vm.prank(user);
-        receiverContract.executeFlashLoan(100 * 10**18);
+        receiverContract.executeFlashLoan(100 ether);
     }
 
     function test_Exploit() public {
@@ -77,6 +69,6 @@ contract UnstoppableTest is Test {
         // It is no longer possible to execute flash loans
         vm.prank(user);
         vm.expectRevert();
-        receiverContract.executeFlashLoan(100 * 10**18);
+        receiverContract.executeFlashLoan(100 ether);
     }
 }
