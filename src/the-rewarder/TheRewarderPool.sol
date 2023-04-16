@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "solady/src/utils/FixedPointMathLib.sol";
-import "solady/src/utils/SafeTransferLib.sol";
-import {RewardToken} from "./RewardToken.sol";
-import {AccountingToken} from "./AccountingToken.sol";
+import {FixedPointMathLib} from "solady/src/utils/FixedPointMathLib.sol";
+import {SafeTransferLib} from "solady/src/utils/SafeTransferLib.sol";
+import {RewardToken} from "src/the-rewarder/RewardToken.sol";
+import {AccountingToken} from "src/the-rewarder/AccountingToken.sol";
 
 /**
  * @title TheRewarderPool
