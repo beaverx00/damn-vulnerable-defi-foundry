@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../DamnValuableTokenSnapshot.sol";
-import "./ISimpleGovernance.sol";
+import {DamnValuableTokenSnapshot} from "src/DamnValuableTokenSnapshot.sol";
+import {ISimpleGovernance} from "src/selfie/ISimpleGovernance.sol";
 
 /**
  * @title SimpleGovernance
