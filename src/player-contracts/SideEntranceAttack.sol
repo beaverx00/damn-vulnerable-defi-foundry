@@ -1,13 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IFlashLoanEtherReceiver, SideEntranceLenderPool} from "src/side-entrance/SideEntranceLenderPool.sol";
+interface IFlashLoanEtherReceiver {
+    function execute() external payable;
+}
+
+interface ISideEntranceLenderPool {
+    function deposit() external payable;
+
+    function withdraw() external;
+
+    function flashLoan(uint256 amount) external;
+}
 
 contract SideEntranceAttack is IFlashLoanEtherReceiver {
-    SideEntranceLenderPool pool;
+    ISideEntranceLenderPool pool;
 
     constructor(address _pool) {
-        pool = SideEntranceLenderPool(_pool);
+        pool = ISideEntranceLenderPool(_pool);
     }
 
     receive() external payable {}
