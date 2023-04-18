@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-import "solady/src/utils/LibSort.sol";
+import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import {LibSort} from "solady/src/utils/LibSort.sol";
 
 /**
  * @title TrustfulOracle
