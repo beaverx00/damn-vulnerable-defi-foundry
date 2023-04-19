@@ -16,17 +16,17 @@ interface IUniswapV1Exchange {
         uint256 min_liquidity,
         uint256 max_tokens,
         uint256 deadline
-    ) external payable returns (uint256 out);
+    ) external payable returns (uint256);
 
     function getTokenToEthInputPrice(uint256 tokens_sold)
         external
-        returns (uint256 out);
+        returns (uint256);
 
     function tokenToEthSwapInput(
         uint256 tokens_sold,
         uint256 min_eth,
         uint256 deadline
-    ) external returns (uint256 out);
+    ) external returns (uint256);
 }
 
 contract PuppetTest is Test {
@@ -60,33 +60,16 @@ contract PuppetTest is Test {
         // Deploy token to be traded in Uniswap
         token = new DamnValuableToken();
 
-        // Deploy a exchange that will be used as the factory template
-        bytes memory exchangeBytecode = abi.encodePacked(
-            vm.getCode("../lib/build-uniswap-v1:UniswapV1Exchange")
+        address exchangeTemplate = deployCode(
+            "src/build-uniswap-v1/UniswapV1Exchange.json"
         );
-        address exchangeTemplate;
-        assembly {
-            exchangeTemplate := create(
-                0,
-                add(exchangeBytecode, 0x20),
-                mload(exchangeBytecode)
-            )
-        }
         vm.label(exchangeTemplate, "ExchangeTemplate");
 
-        // Deploy factory, initializing it with the address of the template exchange
-        bytes memory factoryBytecode = abi.encodePacked(
-            vm.getCode("../lib/build-uniswap-v1:UniswapV1Factory")
+        uniswapFactory = IUniswapV1Factory(
+            deployCode("src/build-uniswap-v1/UniswapV1Factory.json")
         );
-        assembly {
-            let addr := create(
-                0,
-                add(factoryBytecode, 0x20),
-                mload(factoryBytecode)
-            )
-            sstore(uniswapFactory.slot, addr)
-        }
         vm.label(address(uniswapFactory), "UniswapFactory");
+
         uniswapFactory.initializeFactory(address(exchangeTemplate));
 
         // Create a new exchange for the token, and retreive the deployed exchange's address
