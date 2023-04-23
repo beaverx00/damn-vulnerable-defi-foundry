@@ -2,144 +2,16 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
+import {IUniswapV2Factory} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
+import {IUniswapV2Pair} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
+import {IUniswapV2Router02} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {DamnValuableToken} from "src/DamnValuableToken.sol";
 
-interface IWETH {
+interface IWETH9 is IERC20 {
     function deposit() external payable;
 
-    function transfer(address to, uint256 value) external returns (bool);
-
     function withdraw(uint256) external;
-}
-
-interface IUniswapV2Pair {
-    function name() external pure returns (string memory);
-
-    function symbol() external pure returns (string memory);
-
-    function decimals() external pure returns (uint8);
-
-    function totalSupply() external view returns (uint256);
-
-    function balanceOf(address owner) external view returns (uint256);
-
-    function allowance(address owner, address spender)
-        external
-        view
-        returns (uint256);
-
-    function approve(address spender, uint256 value) external returns (bool);
-
-    function transfer(address to, uint256 value) external returns (bool);
-
-    function transferFrom(
-        address from,
-        address to,
-        uint256 value
-    ) external returns (bool);
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32);
-
-    function PERMIT_TYPEHASH() external pure returns (bytes32);
-
-    function nonces(address owner) external view returns (uint256);
-
-    function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
-
-    function MINIMUM_LIQUIDITY() external pure returns (uint256);
-
-    function factory() external view returns (address);
-
-    function token0() external view returns (address);
-
-    function token1() external view returns (address);
-
-    function getReserves()
-        external
-        view
-        returns (
-            uint112 reserve0,
-            uint112 reserve1,
-            uint32 blockTimestampLast
-        );
-
-    function price0CumulativeLast() external view returns (uint256);
-
-    function price1CumulativeLast() external view returns (uint256);
-
-    function kLast() external view returns (uint256);
-
-    function mint(address to) external returns (uint256 liquidity);
-
-    function burn(address to)
-        external
-        returns (uint256 amount0, uint256 amount1);
-
-    function swap(
-        uint256 amount0Out,
-        uint256 amount1Out,
-        address to,
-        bytes calldata data
-    ) external;
-
-    function skim(address to) external;
-
-    function sync() external;
-
-    function initialize(address, address) external;
-}
-
-interface IUniswapV2Factory {
-    function feeTo() external view returns (address);
-
-    function feeToSetter() external view returns (address);
-
-    function getPair(address tokenA, address tokenB)
-        external
-        view
-        returns (address pair);
-
-    function allPairs(uint256) external view returns (address pair);
-
-    function allPairsLength() external view returns (uint256);
-
-    function createPair(address tokenA, address tokenB)
-        external
-        returns (address pair);
-
-    function setFeeTo(address) external;
-
-    function setFeeToSetter(address) external;
-}
-
-interface IUniswapV2Router {
-    function factory() external view returns (address);
-
-    function WETH() external view returns (address);
-
-    function addLiquidityEth(
-        address token,
-        uint256 amountTokenDesired,
-        uint256 amountTokenMin,
-        uint256 amountETHMin,
-        address to,
-        uint256 deadline
-    )
-        external
-        payable
-        returns (
-            uint256 amountToken,
-            uint256 amountETH,
-            uint256 liquidity
-        );
 }
 
 interface IPuppetV2Pool {
@@ -164,10 +36,10 @@ contract PuppetV2Test is Test {
     address player = makeAddr("PLAYER");
 
     DamnValuableToken token;
-    IWETH weth;
+    IWETH9 weth;
 
     IUniswapV2Factory uniswapFactory;
-    IUniswapV2Router uniswapRouter;
+    IUniswapV2Router02 uniswapRouter;
     IUniswapV2Pair uniswapExchange;
     IPuppetV2Pool lendingPool;
 
@@ -185,7 +57,7 @@ contract PuppetV2Test is Test {
         // Deploy token to be traded
         token = new DamnValuableToken();
 
-        weth = IWETH(deployCode("src/build-uniswap-v2/WETH9.json"));
+        weth = IWETH9(deployCode("src/build-uniswap-v2/WETH9.json"));
         vm.label(address(weth), "WETH");
 
         // Create Uniswap Factory and Router
@@ -197,19 +69,17 @@ contract PuppetV2Test is Test {
         );
         vm.label(address(uniswapFactory), "UniswapFactory");
 
-        console.log(uniswapFactory.feeTo());
-        uniswapRouter = IUniswapV2Router(
+        uniswapRouter = IUniswapV2Router02(
             deployCode(
                 "src/build-uniswap-v2/UniswapV2Router02.json",
                 abi.encode(address(uniswapFactory), address(weth))
             )
         );
-        console.log(uniswapRouter.factory(), uniswapRouter.WETH());
         vm.label(address(uniswapRouter), "UniswapRouter");
 
         // Create Uniswap pair against and add Liquidity
         token.approve(address(uniswapRouter), UNISWAP_INITIAL_TOKEN_RESERVE);
-        uniswapRouter.addLiquidityEth{value: UNISWAP_INITIAL_WETH_RESERVE}(
+        uniswapRouter.addLiquidityETH{value: UNISWAP_INITIAL_WETH_RESERVE}(
             address(token),
             UNISWAP_INITIAL_TOKEN_RESERVE,
             0,
@@ -220,6 +90,7 @@ contract PuppetV2Test is Test {
         uniswapExchange = IUniswapV2Pair(
             uniswapFactory.getPair(address(token), address(weth))
         );
+        vm.label(address(uniswapExchange), "UniswapExchange");
 
         // Deploy the lending pool
         lendingPool = IPuppetV2Pool(
@@ -266,6 +137,63 @@ contract PuppetV2Test is Test {
          */
 
         vm.startPrank(player);
+
+        weth.deposit{value: player.balance}();
+
+        console.log("[Before SWAP]");
+        console.log(
+            "Exchange DVT:  %d",
+            token.balanceOf(address(uniswapExchange))
+        );
+        console.log(
+            "Exchange WETH: %d\n",
+            weth.balanceOf(address(uniswapExchange))
+        );
+        console.log("Player WETH:   %d", weth.balanceOf(player));
+        console.log(
+            "Required WETH: %d\n",
+            lendingPool.calculateDepositOfWETHRequired(
+                POOL_INITIAL_TOKEN_BALANCE
+            )
+        );
+
+        // SWAP 10_000 DVT to WETH
+        token.approve(address(uniswapRouter), PLAYER_INITIAL_TOKEN_BALANCE);
+        address[] memory path = new address[](2);
+        path[0] = address(token);
+        path[1] = address(weth);
+        uniswapRouter.swapExactTokensForTokens(
+            PLAYER_INITIAL_TOKEN_BALANCE,
+            0,
+            path,
+            player,
+            block.timestamp * 2
+        );
+
+        console.log("[After SWAP]");
+        console.log(
+            "Exchange DVT:  %d",
+            token.balanceOf(address(uniswapExchange))
+        );
+        console.log(
+            "Exchange WETH: %d\n",
+            weth.balanceOf(address(uniswapExchange))
+        );
+        console.log("Player WETH:   %d", weth.balanceOf(player));
+        console.log(
+            "Required WETH: %d\n",
+            lendingPool.calculateDepositOfWETHRequired(
+                POOL_INITIAL_TOKEN_BALANCE
+            )
+        );
+
+        weth.approve(
+            address(lendingPool),
+            lendingPool.calculateDepositOfWETHRequired(
+                POOL_INITIAL_TOKEN_BALANCE
+            )
+        );
+        lendingPool.borrow(POOL_INITIAL_TOKEN_BALANCE);
 
         vm.stopPrank();
 
